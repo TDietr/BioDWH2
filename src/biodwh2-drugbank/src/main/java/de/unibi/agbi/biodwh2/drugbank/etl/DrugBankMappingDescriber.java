@@ -33,8 +33,15 @@ public class DrugBankMappingDescriber extends MappingDescriber {
     private NodeMappingDescription[] describeDrug(final Node node){
         final NodeMappingDescription description = new NodeMappingDescription(NodeMappingDescription.NodeType.DRUG);
         description.addIdentifier(IdentifierType.DRUG_BANK, node.<String>getProperty("drugbank_id"));
+        description.addIdentifier(IdentifierType.CAS, node.<String>getProperty("cas_number"));
+        description.addIdentifier(IdentifierType.UNII, node.<String>getProperty("unii"));
         description.addName(node.getProperty("name"));
-        return new NodeMappingDescription[]{description};
+        final NodeMappingDescription compoundDescription = new NodeMappingDescription(NodeMappingDescription.NodeType.COMPOUND);
+        description.addIdentifier(IdentifierType.DRUG_BANK, node.<String>getProperty("drugbank_id"));
+        description.addIdentifier(IdentifierType.CAS, node.<String>getProperty("cas_number"));
+        description.addIdentifier(IdentifierType.UNII, node.<String>getProperty("unii"));
+        description.addName(node.getProperty("name"));
+        return new NodeMappingDescription[]{description, compoundDescription};
         }
 
     private NodeMappingDescription[] describePathway(final Node node){
@@ -108,11 +115,15 @@ public class DrugBankMappingDescriber extends MappingDescriber {
 
     @Override
     public PathMappingDescription describe(Graph graph, Node[] nodes, Edge[] edges) {
+        if (edges[0].getLabel().endsWith("INTERACTS_WITH_DRUG"))
+            return new PathMappingDescription(PathMappingDescription.EdgeType.INTERACTS);
         return null;
     }
 
     @Override
     protected String[][] getEdgeMappingPaths() {
-        return new String[0][];
+        return new String[][]{
+                {"Drug", "INTERACTS_WITH_DRUG", "Drug"}
+        };
     }
 }

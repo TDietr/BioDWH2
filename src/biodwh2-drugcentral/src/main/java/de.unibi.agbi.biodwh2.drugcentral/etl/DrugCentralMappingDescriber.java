@@ -82,7 +82,29 @@ public class DrugCentralMappingDescriber extends MappingDescriber {
         final NodeMappingDescription description = new NodeMappingDescription(NodeMappingDescription.NodeType.COMPOUND);
         description.addName(node.getProperty("name"));
         description.addIdentifier(IdentifierType.CAS, node.<String>getProperty("cas_reg_no"));
-        return new NodeMappingDescription[]{description};
+        Long[] nodeIds = graph.getAdjacentNodeIdsForEdgeLabel(node.getId(),
+                                                              "DrugCentral_HAS_IDENTIFIER");
+        for (int i = 0; i < nodeIds.length; i++) {
+            Node adjacentNode = graph.getNode(nodeIds[i]);
+            if (adjacentNode.getProperty("type").equals("DRUGBANK_ID")) {
+                description.addIdentifier(IdentifierType.DRUG_BANK, adjacentNode.<String>getProperty("identifier"));
+            } else if (adjacentNode.getProperty("type").equals("UNII")) {
+                description.addIdentifier(IdentifierType.UNII, adjacentNode.<String>getProperty("identifier"));
+            }
+        }
+        final NodeMappingDescription drugDescription = new NodeMappingDescription(NodeMappingDescription.NodeType.DRUG);
+        description.addName(node.getProperty("name"));
+        description.addIdentifier(IdentifierType.CAS, node.<String>getProperty("cas_reg_no"));
+        //Long[] drugNodeIds = graph.getAdjacentNodeIdsForEdgeLabel(node.getId(),"DrugCentral_HAS_IDENTIFIER");
+        for (int i = 0; i < nodeIds.length; i++) {
+            Node adjacentNode = graph.getNode(nodeIds[i]);
+            if (adjacentNode.getProperty("type").equals("DRUGBANK_ID")) {
+                description.addIdentifier(IdentifierType.DRUG_BANK, adjacentNode.<String>getProperty("identifier"));
+            } else if (adjacentNode.getProperty("type").equals("UNII")) {
+                description.addIdentifier(IdentifierType.UNII, adjacentNode.<String>getProperty("identifier"));
+            }
+        }
+        return new NodeMappingDescription[]{description, drugDescription};
     }
 
     private NodeMappingDescription[] describeActiveIngredient(final Graph graph, final Node node) {
@@ -90,7 +112,7 @@ public class DrugCentralMappingDescriber extends MappingDescriber {
         description.addName(node.getProperty("substance_name"));
         description.addIdentifier(IdentifierType.UNII, node.<String>getProperty("substance_unii"));
         final NodeMappingDescription activeMoietyDescription = new NodeMappingDescription(
-                NodeMappingDescription.NodeType.COMPOUND);
+                NodeMappingDescription.NodeType.DRUG);
         activeMoietyDescription.addName(node.getProperty("active_moiety_name"));
         activeMoietyDescription.addIdentifier(IdentifierType.UNII, node.<String>getProperty("active_moiety_unii"));
         return new NodeMappingDescription[]{description, activeMoietyDescription};
@@ -157,13 +179,19 @@ public class DrugCentralMappingDescriber extends MappingDescriber {
 
     @Override
     public PathMappingDescription describe(final Graph graph, final Node[] nodes, final Edge[] edges) {
+        for(int i=0;i < edges.length;i++){
+
+        }
+        if (edges.length == 3 && edges[1].getLabel().endsWith("INTERACTS"))
+            return new PathMappingDescription(PathMappingDescription.EdgeType.INTERACTS);
         return null;
     }
 
     @Override
     protected String[][] getEdgeMappingPaths() {
         return new String[][]{
-                {"Structure", "INDICATION", "OMOPConcept"}, {"Structure", "CONTRAINDICATION", "OMOPConcept"}
+                {"Structure", "INDICATION", "OMOPConcept"}, {"Structure", "CONTRAINDICATION", "OMOPConcept"},
+                {"Structure", "BELONGS_TO", "DrugClass", "INTERACTS", "DrugClass", "BELONGS_TO", "Structure"}
         };
     }
 }
