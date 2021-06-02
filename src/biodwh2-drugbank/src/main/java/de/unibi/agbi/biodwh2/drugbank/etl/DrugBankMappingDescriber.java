@@ -37,10 +37,10 @@ public class DrugBankMappingDescriber extends MappingDescriber {
         description.addIdentifier(IdentifierType.UNII, node.<String>getProperty("unii"));
         description.addName(node.getProperty("name"));
         final NodeMappingDescription compoundDescription = new NodeMappingDescription(NodeMappingDescription.NodeType.COMPOUND);
-        description.addIdentifier(IdentifierType.DRUG_BANK, node.<String>getProperty("drugbank_id"));
-        description.addIdentifier(IdentifierType.CAS, node.<String>getProperty("cas_number"));
-        description.addIdentifier(IdentifierType.UNII, node.<String>getProperty("unii"));
-        description.addName(node.getProperty("name"));
+        compoundDescription.addIdentifier(IdentifierType.DRUG_BANK, node.<String>getProperty("drugbank_id"));
+        compoundDescription.addIdentifier(IdentifierType.CAS, node.<String>getProperty("cas_number"));
+        compoundDescription.addIdentifier(IdentifierType.UNII, node.<String>getProperty("unii"));
+        compoundDescription.addName(node.getProperty("name"));
         return new NodeMappingDescription[]{description, compoundDescription};
         }
 
